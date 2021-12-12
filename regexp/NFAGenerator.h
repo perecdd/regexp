@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "NFA.h"
+#include <stack>
 
 // Grammar:
 // E -> E4
@@ -26,12 +27,13 @@
 // E22 -> * E22
 // E22 -> e
 // E1 -> sym
+// E1 -> (E)
 // 
-class RPNGenerator
+class NFAGenerator
 {
 public:
-	RPNGenerator();
-	NFA generate(const std::string& line);
+	NFAGenerator();
+	std::shared_ptr<NFA> generate(const std::string& line);
 
 private:
 	bool isSym(char sym);
@@ -44,6 +46,7 @@ private:
 	bool E22();
 	bool E1();
 
+	std::stack<NFA> nfa_stack;
 	const char* line_ = nullptr;
 	int pointer = 0;
 	int size = 0;

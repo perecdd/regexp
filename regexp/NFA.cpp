@@ -54,8 +54,6 @@ void NFA::CYCLE()
 	end_ = end;
 }
 
-#include <iostream>
-
 bool NFA::runOnLine(const std::string& line) {
 	old_states.clear();
 	states_.clear();
@@ -67,11 +65,6 @@ bool NFA::runOnLine(const std::string& line) {
 		old_states.clear(); // Clear de-cycle massive
 		for (std::shared_ptr<Node> node : moveTo(S, line[i])) {
 			newset.merge(runOnEpsilon(node));
-
-			for (auto k : newset) {
-				std::cout << k << ' ';
-			}
-			std::cout << std::endl;
 		}
 		S.swap(newset);
 		newset.clear();

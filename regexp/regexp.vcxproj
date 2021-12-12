@@ -142,12 +142,12 @@
   <ItemGroup>
     <ClCompile Include="NFA.cpp" />
     <ClCompile Include="regexp.cpp" />
-    <ClCompile Include="RPNGenerator.cpp" />
+    <ClCompile Include="NFAGenerator.cpp" />
     <ClCompile Include="SyntaxAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NFA.h" />
-    <ClInclude Include="RPNGenerator.h" />
+    <ClInclude Include="NFAGenerator.h" />
     <ClInclude Include="SyntaxAnalyzer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

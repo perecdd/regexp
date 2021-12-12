@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "../regexp/SyntaxAnalyzer.cpp"
-#include "../regexp/RPNGenerator.cpp"
+#include "../regexp/NFAGenerator.cpp"
 #include "../regexp/NFA.cpp"
 
 TEST(SyntaxAnalyzer, GoodData) {
@@ -27,6 +27,7 @@ TEST(SyntaxAnalyzer, GoodData) {
 	EXPECT_TRUE(analyzer.analyze("((a*&b*)*)*"));
 	EXPECT_TRUE(analyzer.analyze("a|b|c|d|e|f"));
 	EXPECT_TRUE(analyzer.analyze("((a)|(b))|c"));
+	EXPECT_TRUE(analyzer.analyze("(a|b)&c"));
 }
 
 TEST(SyntaxAnalyzer, BadData) {
@@ -207,5 +208,194 @@ TEST(NFA, Cycle) {
 		EXPECT_TRUE(!nfa0.runOnLine("0120"));
 		EXPECT_TRUE(!nfa0.runOnLine("01201"));
 		EXPECT_TRUE(nfa0.runOnLine("012012"));
+	}
+}
+
+TEST(NFA, HardExpressions) {
+	{
+		//(a&b&c)|c*
+		NFA nfa0('a');
+		NFA nfa1('b');
+		NFA nfa2('c');
+		NFA nfa3('c');
+		nfa3.CYCLE();
+		nfa0.AND(nfa1);
+		nfa0.AND(nfa2);
+		nfa0.OR(nfa3);
+		EXPECT_TRUE(nfa0.runOnLine("abc"));
+		EXPECT_TRUE(!nfa0.runOnLine("ab"));
+		EXPECT_TRUE(!nfa0.runOnLine("a"));
+		EXPECT_TRUE(nfa0.runOnLine(""));
+		EXPECT_TRUE(nfa0.runOnLine("c"));
+		EXPECT_TRUE(nfa0.runOnLine("ccccc"));
+	}
+
+	{
+		//((a&b&c)|c*)*
+		NFA nfa0('a');
+		NFA nfa1('b');
+		NFA nfa2('c');
+		NFA nfa3('c');
+		nfa3.CYCLE();
+		nfa0.AND(nfa1);
+		nfa0.AND(nfa2);
+		nfa0.OR(nfa3);
+		nfa0.CYCLE();
+
+		EXPECT_TRUE(nfa0.runOnLine("abc"));
+		EXPECT_TRUE(!nfa0.runOnLine("ab"));
+		EXPECT_TRUE(!nfa0.runOnLine("a"));
+		EXPECT_TRUE(nfa0.runOnLine("abcabc"));
+		EXPECT_TRUE(nfa0.runOnLine(""));
+		EXPECT_TRUE(nfa0.runOnLine("c"));
+		EXPECT_TRUE(nfa0.runOnLine("abcabcccccccc"));
+		EXPECT_TRUE(nfa0.runOnLine("ccccc"));
+		EXPECT_TRUE(nfa0.runOnLine("ccabccccabc"));
+		EXPECT_TRUE(nfa0.runOnLine("cabc"));
+	}
+}
+
+TEST(NFAGenerator, GoodData) {
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("a"));
+		EXPECT_TRUE(!nfa->runOnLine("aa"));
+	}
+
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a&b");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(!nfa->runOnLine("a"));
+		EXPECT_TRUE(!nfa->runOnLine("aa"));
+		EXPECT_TRUE(nfa->runOnLine("ab"));
+		EXPECT_TRUE(!nfa->runOnLine("ba"));
+	}
+
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a|b");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("a"));
+		EXPECT_TRUE(!nfa->runOnLine("aa"));
+		EXPECT_TRUE(!nfa->runOnLine("ab"));
+		EXPECT_TRUE(!nfa->runOnLine("ba"));
+		EXPECT_TRUE(nfa->runOnLine("b"));
+	}
+
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a*");
+		EXPECT_TRUE(nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("a"));
+		EXPECT_TRUE(nfa->runOnLine("aa"));
+		EXPECT_TRUE(nfa->runOnLine("aaaaaaaa"));
+		EXPECT_TRUE(!nfa->runOnLine("ab"));
+		EXPECT_TRUE(!nfa->runOnLine("ba"));
+		EXPECT_TRUE(!nfa->runOnLine("b"));
+	}
+
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a|b&c");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("bc"));
+		EXPECT_TRUE(nfa->runOnLine("a"));
+		EXPECT_TRUE(!nfa->runOnLine("abc"));
+		EXPECT_TRUE(!nfa->runOnLine("ab"));
+		EXPECT_TRUE(!nfa->runOnLine("ac"));
+	}
+
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("(a|b)&c");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("bc"));
+		EXPECT_TRUE(nfa->runOnLine("ac"));
+		EXPECT_TRUE(!nfa->runOnLine("abc"));
+		EXPECT_TRUE(!nfa->runOnLine("ab"));
+	}
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("a**&c");
+		EXPECT_TRUE(!nfa->runOnLine(""));
+		EXPECT_TRUE(nfa->runOnLine("c"));
+		EXPECT_TRUE(nfa->runOnLine("ac"));
+		EXPECT_TRUE(nfa->runOnLine("aaaaaac"));
+		EXPECT_TRUE(!nfa->runOnLine("abc"));
+		EXPECT_TRUE(!nfa->runOnLine("ab"));
+	}
+}
+
+TEST(NFAGenerator, BadData) {
+	{
+		NFAGenerator generator;
+		std::shared_ptr<NFA> nfa = generator.generate("");
+		EXPECT_TRUE(nfa->runOnLine(""));
+		EXPECT_TRUE(!nfa->runOnLine("a"));
+		EXPECT_TRUE(!nfa->runOnLine("0"));
+		EXPECT_TRUE(!nfa->runOnLine("8fd"));
+	}
+	{
+		NFAGenerator generator;
+
+		bool error = false;
+		try {
+			std::shared_ptr<NFA> nfa = generator.generate("ac");
+		}
+		catch (const std::exception&) {
+			error = true;
+		}
+		EXPECT_TRUE(error);
+	}
+	{
+		NFAGenerator generator;
+
+		bool error = false;
+		try {
+			std::shared_ptr<NFA> nfa = generator.generate("a&&c");
+		}
+		catch (const std::exception&) {
+			error = true;
+		}
+		EXPECT_TRUE(error);
+	}
+	{
+		NFAGenerator generator;
+
+		bool error = false;
+		try {
+			std::shared_ptr<NFA> nfa = generator.generate("a**c");
+		}
+		catch (const std::exception&) {
+			error = true;
+		}
+		EXPECT_TRUE(error);
+	}
+	{
+		NFAGenerator generator;
+
+		bool error = false;
+		try {
+			std::shared_ptr<NFA> nfa = generator.generate("a**|&c");
+		}
+		catch (const std::exception&) {
+			error = true;
+		}
+		EXPECT_TRUE(error);
+	}
+	{
+		NFAGenerator generator;
+
+		bool error = false;
+		try {
+			std::shared_ptr<NFA> nfa = generator.generate("a*c*");
+		}
+		catch (const std::exception&) {
+			error = true;
+		}
+		EXPECT_TRUE(error);
 	}
 }

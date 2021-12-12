@@ -21,7 +21,7 @@
     <ClCompile Include="SyntaxAnalyzer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="RPNGenerator.cpp">
+    <ClCompile Include="NFAGenerator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="NFA.cpp">
@@ -32,7 +32,7 @@
     <ClInclude Include="SyntaxAnalyzer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="RPNGenerator.h">
+    <ClInclude Include="NFAGenerator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="NFA.h">
