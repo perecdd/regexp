@@ -8,7 +8,7 @@ bool NFAGenerator::isSym(char sym) {
 NFAGenerator::NFAGenerator()
 {
 }
-#include <iostream>
+
 std::shared_ptr<NFA> NFAGenerator::generate(const std::string& line)
 {
 	pointer = 0;
@@ -22,7 +22,6 @@ std::shared_ptr<NFA> NFAGenerator::generate(const std::string& line)
 		return std::make_shared<NFA>(EMPTY_SYM);
 	}
 	else {
-		std::cout << pointer << ' ' << size << ' ' << nfa_stack.size();
 		throw std::runtime_error("Invalid regular expression");
 	}
 }
@@ -50,7 +49,6 @@ bool NFAGenerator::E44()
 		if (!E3()) return false;
 		if (!E44()) return false;
 
-		std::cout << "|\n";
 		if (nfa_stack.size() >= 2) {
 			NFA nfa1 = std::move(nfa_stack.top());
 			nfa_stack.pop();
@@ -80,8 +78,6 @@ bool NFAGenerator::E33()
 		pointer++;
 		if (!E2()) return false;
 		if (!E33()) return false;
-
-		std::cout << "&\n";
 
 		if (nfa_stack.size() >= 2) {
 			NFA nfa1 = std::move(nfa_stack.top());
