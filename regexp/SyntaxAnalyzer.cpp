@@ -1,6 +1,6 @@
 #include "SyntaxAnalyzer.h"
 
-bool isSym(char sym) {
+bool SyntaxAnalyzer::isSym(char sym) {
 	return (sym >= 'a' && sym <= 'z') || (sym >= '0' && sym <= '9');
 }
 
@@ -93,6 +93,5 @@ bool SyntaxAnalyzer::E1()
 		else return false;
 	}
 	else return false;
-	//else if (!E()) return false;
 	return true;
 }

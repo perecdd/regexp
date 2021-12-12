@@ -24,12 +24,18 @@
     <ClCompile Include="RPNGenerator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="NFA.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SyntaxAnalyzer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="RPNGenerator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="NFA.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

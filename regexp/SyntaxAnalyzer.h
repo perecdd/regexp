@@ -33,6 +33,7 @@ public:
 	bool analyze(const std::string& line);
 
 private:
+	bool isSym(char sym);
 	bool E();
 	bool E4();
 	bool E44();
