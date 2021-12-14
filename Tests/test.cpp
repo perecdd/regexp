@@ -48,6 +48,21 @@ TEST(SyntaxAnalyzer, BadData) {
 	EXPECT_TRUE(!analyzer.analyze("((a)|(b))|c()"));
 }
 
+TEST(Corrector, Data) {
+	EXPECT_EQ("", correct(""));
+	EXPECT_EQ("a&b", correct("ab"));
+	EXPECT_EQ("a&b&c&d&e", correct("abcde"));
+	EXPECT_EQ("a|b", correct("a|b"));
+	EXPECT_EQ("a*&b", correct("a*b"));
+	EXPECT_EQ("a**&b", correct("a**b"));
+	EXPECT_EQ("(a)&(b)", correct("(a)(b)"));
+	EXPECT_EQ("(a)&((c)&b)", correct("(a)((c)b)"));
+	EXPECT_EQ("(a)&((c)|b)", correct("(a)((c)|b)"));
+	EXPECT_EQ("(a)&((c)**&b)", correct("(a)((c)**b)"));
+	EXPECT_EQ("a|b&c|e", correct("a|bc|e"));
+	EXPECT_EQ("a&(b&c)*&e", correct("a(bc)*e"));
+}
+
 TEST(NFA, Constructor) {
 	{
 		NFA nfa0('0');

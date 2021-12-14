@@ -26,14 +26,17 @@
 // E22 -> e
 // E1 -> sym
 // 
+
+std::string correct(const std::string& line);
+
 class SyntaxAnalyzer
 {
 public:
 	SyntaxAnalyzer();
 	bool analyze(const std::string& line);
+	static bool isSym(char sym);
 
 private:
-	bool isSym(char sym);
 	bool E();
 	bool E4();
 	bool E44();

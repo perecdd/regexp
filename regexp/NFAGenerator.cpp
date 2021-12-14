@@ -48,7 +48,6 @@ bool NFAGenerator::E44()
 		pointer++;
 		if (!E3()) return false;
 		if (!E44()) return false;
-
 		if (nfa_stack.size() >= 2) {
 			NFA nfa1 = std::move(nfa_stack.top());
 			nfa_stack.pop();
@@ -106,8 +105,8 @@ bool NFAGenerator::E22()
 	if (pointer >= size) return true;
 	if (line_[pointer] == '*') {
 		pointer++;
-		if (!E22()) return false;
 		nfa_stack.top().CYCLE();
+		if (!E22()) return false;
 	}
 	return true;
 }

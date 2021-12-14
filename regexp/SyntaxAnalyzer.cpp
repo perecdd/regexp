@@ -4,6 +4,44 @@ bool SyntaxAnalyzer::isSym(char sym) {
 	return (sym >= 'a' && sym <= 'z') || (sym >= '0' && sym <= '9');
 }
 
+std::string correct(const std::string& line) {
+	int pointer = 0;
+	int size = line.size();
+	std::string result;
+
+	while (size > pointer) {
+		char first = line[pointer];
+		result.push_back(first);
+		pointer++;
+
+		if (!SyntaxAnalyzer::isSym(first) && first != ')') {
+			continue;
+		}
+
+		if (size <= pointer) break;
+		char second = line[pointer];
+
+		if (SyntaxAnalyzer::isSym(second) || second == '(') {
+			result.push_back('&');
+		}
+		else if (second == '*') {
+			while (size > pointer) {
+				result.push_back('*');
+				pointer++;
+				second = line[pointer];
+				if (SyntaxAnalyzer::isSym(second) || second == '(') {
+					result.push_back('&');
+					break;
+				}
+				else if (second == ')') {
+					break;
+				}
+			}
+		}
+	}
+	return result;
+}
+
 SyntaxAnalyzer::SyntaxAnalyzer()
 {
 }
